@@ -5,9 +5,7 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 require("dotenv").config();
 const mongoose = require("mongoose");
-
-var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
+const routes = require("./routes/routes.ts");
 
 var app = express();
 
@@ -21,8 +19,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/", indexRouter);
-app.use("/users", usersRouter);
+app.use("/", routes);
+
+app.listen(3001, () => {
+  console.log("Server is running at port 3001");
+});
 
 mongoose.connect(process.env.DB_CONNECTION_STRING);
 
