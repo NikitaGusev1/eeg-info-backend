@@ -3,9 +3,9 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-require("dotenv").config();
 const mongoose = require("mongoose");
 const routes = require("./routes/routes.ts");
+const { dbConnectionString } = require("./config");
 
 var app = express();
 
@@ -25,7 +25,7 @@ app.listen(3001, () => {
   console.log("Server is running at port 3001");
 });
 
-mongoose.connect(process.env.DB_CONNECTION_STRING);
+mongoose.connect(dbConnectionString);
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error: "));
