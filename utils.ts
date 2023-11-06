@@ -4,8 +4,7 @@ const jwt = require("jsonwebtoken");
 
 function generateToken(user) {
   const payload = {
-    id: user.id,
-    username: user.username,
+    email: user.email,
   };
 
   return jwt.sign(payload, jwtSecretKey, { expiresIn: "72h" });
@@ -20,19 +19,22 @@ function verifyToken(token) {
 }
 
 function authenticateToken(req, res, next) {
-  const token = req.header("Authorization");
+  const tokenWithPrefix = req.header("Authorization");
+  const token = tokenWithPrefix.replace("Bearer ", "");
+
+  console.log(token);
 
   if (!token) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  const user = verifyToken(token);
-  if (!user) {
-    return res.status(403).json({ message: "Invalid token" });
+  try {
+    const user = jwt.verify(token, jwtSecretKey);
+    req.user = user;
+    next();
+  } catch (error) {
+    res.status(403).json({ message: "Invalid token" });
   }
-
-  req.user = user;
-  next();
 }
 
-module.exports = { generateToken, verifyToken };
+module.exports = { generateToken, verifyToken, authenticateToken };

@@ -3,7 +3,11 @@ const UserModel = require("../models/User.ts");
 const app = express();
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const { generateToken, verifyToken } = require("../utils.ts");
+const {
+  generateToken,
+  verifyToken,
+  authenticateToken,
+} = require("../utils.ts");
 const mongoose = require("../db");
 
 router.post("/add_user", async (request, response) => {
@@ -22,42 +26,42 @@ router.post("/add_user", async (request, response) => {
     response.status(500).send(error);
   }
 });
-
-router.get("/users", async (request, response) => {
-  const users = await UserModel.find({});
+router.get("/user", authenticateToken, async (request, response) => {
+  const email = request.user.email;
+  const user = await UserModel.find({ email });
 
   try {
-    response.send(users);
+    response.send(user);
   } catch (error) {
     response.status(500).send(error);
   }
 });
 
-router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+router.post("/login", async (request, response) => {
+  const { email, password } = request.body;
 
   try {
     const user = await UserModel.findOne({ email });
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return response.status(401).json({ message: "Invalid credentials" });
     }
 
     bcrypt.compare(password, user.password, (err, passwordMatch) => {
       if (err) {
-        return res.status(500).json({ message: "Server error" });
+        return response.status(500).json({ message: "Server error" });
       }
 
       if (passwordMatch) {
         const token = generateToken(user);
-        res.json({ token });
+        response.json({ token, name: user.name });
       } else {
-        res.status(401).json({ message: "Invalid credentials" });
+        response.status(401).json({ message: "Invalid credentials" });
       }
     });
   } catch (error) {
     console.error("Error authenticating user:", error);
-    res.status(500).json({ message: "Server error" });
+    response.status(500).json({ message: "Server error" });
   }
 });
 
