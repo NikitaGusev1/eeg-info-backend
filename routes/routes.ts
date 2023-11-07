@@ -9,6 +9,7 @@ const {
   authenticateToken,
 } = require("../utils.ts");
 const mongoose = require("../db");
+const jwt = require("jsonwebtoken");
 
 router.post("/add_user", async (request, response) => {
   const saltRounds = 10;
@@ -62,6 +63,20 @@ router.post("/login", async (request, response) => {
   } catch (error) {
     console.error("Error authenticating user:", error);
     response.status(500).json({ message: "Server error" });
+  }
+});
+
+router.post("/renewToken", authenticateToken, (request, response) => {
+  try {
+    const userData = {
+      email: request.user.email,
+    };
+
+    const newToken = jwt.sign(userData, jwtSecretKey, { expiresIn: "1h" });
+
+    response.json({ token: newToken });
+  } catch (error) {
+    response.status(403).json({ message: "Invalid token" });
   }
 });
 

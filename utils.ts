@@ -7,7 +7,7 @@ function generateToken(user) {
     email: user.email,
   };
 
-  return jwt.sign(payload, jwtSecretKey, { expiresIn: "72h" });
+  return jwt.sign(payload, jwtSecretKey, { expiresIn: "1h" });
 }
 
 function verifyToken(token) {
@@ -21,8 +21,6 @@ function verifyToken(token) {
 function authenticateToken(req, res, next) {
   const tokenWithPrefix = req.header("Authorization");
   const token = tokenWithPrefix.replace("Bearer ", "");
-
-  console.log(token);
 
   if (!token) {
     return res.status(401).json({ message: "Unauthorized" });
