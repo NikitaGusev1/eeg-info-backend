@@ -66,7 +66,7 @@ router.post("/login", async (request, response) => {
   }
 });
 
-router.post("/renewToken", authenticateToken, (request, response) => {
+router.post("/renewToken", (request, response) => {
   try {
     const userData = {
       email: request.user.email,
