@@ -80,4 +80,33 @@ router.post("/renewToken", (request, response) => {
   }
 });
 
+router.post("/assignFiles", authenticateToken, async (request, response) => {
+  try {
+    const { isAdmin } = request.user;
+    if (isAdmin) {
+      const { files, email } = request.body;
+      console.log(email, files);
+      const assignee = await UserModel.findOne({ email });
+
+      if (!assignee) {
+        return response.status(404).json({ message: "User not found" });
+      }
+
+      const updatedAssignedFiles = [...assignee.assignedFiles, ...files];
+
+      await UserModel.findOneAndUpdate(
+        { email },
+        { assignedFiles: updatedAssignedFiles },
+        { new: true }
+      );
+
+      response.status(200).json({ message: "Files assigned successfully" });
+    } else {
+      response.status(403).json({ message: "Permission denied" });
+    }
+  } catch {
+    response.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;

@@ -6,6 +6,7 @@ var logger = require("morgan");
 const mongoose = require("mongoose");
 const routes = require("./routes/routes.ts");
 const cors = require("cors");
+const bodyParser = require("body-parser");
 const { dbConnectionString } = require("./config");
 
 var app = express();
@@ -14,6 +15,8 @@ var app = express();
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
 
+app.use(bodyParser.json({ limit: "128mb" }));
+app.use(bodyParser.urlencoded({ extended: true, limit: "128mb" }));
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

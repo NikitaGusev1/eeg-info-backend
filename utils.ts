@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 function generateToken(user) {
   const payload = {
     email: user.email,
+    isAdmin: user.isAdmin,
   };
 
   return jwt.sign(payload, jwtSecretKey, { expiresIn: "1h" });
