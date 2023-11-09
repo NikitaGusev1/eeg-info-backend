@@ -85,7 +85,6 @@ router.post("/assignFiles", authenticateToken, async (request, response) => {
     const { isAdmin } = request.user;
     if (isAdmin) {
       const { files, email } = request.body;
-      console.log(email, files);
       const assignee = await UserModel.findOne({ email });
 
       if (!assignee) {
