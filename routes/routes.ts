@@ -92,7 +92,17 @@ router.post("/assignFiles", authenticateToken, async (request, response) => {
         return response.status(404).json({ message: "User not found" });
       }
 
-      const updatedAssignedFiles = [...assignee.assignedFiles, ...files];
+      const uniqueFiles = files.filter(
+        (file) => !assignee.assignedFiles.includes(file)
+      );
+
+      if (uniqueFiles.length === 0) {
+        return response
+          .status(400)
+          .json({ message: "All files are already assigned" });
+      }
+
+      const updatedAssignedFiles = [...assignee.assignedFiles, ...uniqueFiles];
 
       await UserModel.findOneAndUpdate(
         { email },
@@ -104,7 +114,8 @@ router.post("/assignFiles", authenticateToken, async (request, response) => {
     } else {
       response.status(403).json({ message: "Permission denied" });
     }
-  } catch {
+  } catch (error) {
+    console.error(error);
     response.status(500).json({ message: "Server error" });
   }
 });
