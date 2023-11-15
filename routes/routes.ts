@@ -28,11 +28,21 @@ router.post("/add_user", async (request, response) => {
   }
 });
 router.get("/user", authenticateToken, async (request, response) => {
-  const email = request.user.email;
-  const user = await UserModel.find({ email });
-
   try {
-    response.send(user);
+    const email = request.user.email;
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      return response.status(404).send("User not found");
+    }
+
+    const userResponse = {
+      email: user.email,
+      name: user.name,
+      isAdmin: user.isAdmin,
+    };
+
+    response.send(userResponse);
   } catch (error) {
     response.status(500).send(error);
   }
