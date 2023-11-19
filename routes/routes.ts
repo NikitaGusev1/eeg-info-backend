@@ -10,6 +10,8 @@ const {
 } = require("../utils.ts");
 const mongoose = require("../db");
 const jwt = require("jsonwebtoken");
+const { spawn } = require("child_process");
+const path = require("path");
 
 router.post("/add_user", async (request, response) => {
   const saltRounds = 10;
@@ -127,6 +129,40 @@ router.post("/assignFiles", authenticateToken, async (request, response) => {
     console.error(error);
     response.status(500).json({ message: "Server error" });
   }
+});
+
+router.post("/findPeaks", authenticateToken, (request, response) => {
+  const { data } = request.body;
+  console.log(data);
+
+  const pythonScriptPath = path.join(
+    __dirname,
+    "..",
+    "scripts",
+    "find_peaks.py"
+  );
+  const pythonProcess = spawn("python3", [pythonScriptPath]);
+
+  // Send EEG data to the Python process
+  pythonProcess.stdin.write(JSON.stringify(data));
+  pythonProcess.stdin.end();
+
+  // Capture output from the Python process
+  let result = "";
+  pythonProcess.stdout.on("data", (data) => {
+    result += data;
+  });
+
+  // Handle errors
+  pythonProcess.stderr.on("data", (data) => {
+    console.error(`Error: ${data}`);
+  });
+
+  // Handle process exit
+  pythonProcess.on("close", (code) => {
+    const parsedResult = JSON.parse(result);
+    console.log("Detected Peaks:", parsedResult);
+  });
 });
 
 module.exports = router;
