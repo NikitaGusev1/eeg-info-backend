@@ -36,4 +36,47 @@ function authenticateToken(req, res, next) {
   }
 }
 
-module.exports = { generateToken, verifyToken, authenticateToken };
+function generateRandomString() {
+  const lowercaseLetters = "abcdefghijklmnopqrstuvwxyz";
+  const uppercaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const specialCharacters = "!@#$%^&*()_+{}|:<>?-=[];,./";
+
+  const randomUppercase =
+    uppercaseLetters[Math.floor(Math.random() * uppercaseLetters.length)];
+
+  const randomSpecialChar =
+    specialCharacters[Math.floor(Math.random() * specialCharacters.length)];
+
+  const randomChars = Array.from(
+    { length: 8 },
+    () => lowercaseLetters[Math.floor(Math.random() * lowercaseLetters.length)]
+  );
+
+  const allChars = randomChars.concat(randomUppercase, randomSpecialChar);
+  const shuffledChars = allChars.sort(() => Math.random() - 0.5);
+
+  const randomString = shuffledChars.join("");
+
+  return randomString;
+}
+
+function generateUniqueEmail(firstName, lastName, existingEmails) {
+  const baseEmail = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@eeg.com`;
+  let generatedEmail = baseEmail;
+  let counter = 1;
+
+  while (existingEmails.includes(generatedEmail)) {
+    generatedEmail = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${counter}@eeg.com`;
+    counter++;
+  }
+
+  return generatedEmail;
+}
+
+module.exports = {
+  generateToken,
+  verifyToken,
+  authenticateToken,
+  generateRandomString,
+  generateUniqueEmail,
+};

@@ -7,24 +7,41 @@ const {
   generateToken,
   verifyToken,
   authenticateToken,
+  generateRandomString,
+  generateUniqueEmail,
 } = require("../utils.ts");
 const mongoose = require("../db");
 const jwt = require("jsonwebtoken");
 const { spawn } = require("child_process");
 const path = require("path");
 
-router.post("/add_user", async (request, response) => {
-  const saltRounds = 10;
-  const hashedPassword = await bcrypt.hash(request.body.password, saltRounds);
-
-  const user = new UserModel({
-    ...request.body,
-    password: hashedPassword,
-  });
-
+router.post("/addUser", authenticateToken, async (request, response) => {
   try {
-    await user.save();
-    response.send(user);
+    const { isAdmin } = request.user;
+    if (isAdmin) {
+      const firstName = request.body.firstName;
+      const lastName = request.body.lastName;
+
+      const password = generateRandomString();
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      const existingEmails = await UserModel.find().distinct("email");
+
+      const email = generateUniqueEmail(firstName, lastName, existingEmails);
+
+      const user = new UserModel({
+        firstName,
+        lastName,
+        email,
+        password: hashedPassword,
+      });
+
+      await user.save();
+      response.send({ email, password });
+    } else {
+      return response.status(401).json({ message: "Permisson denied" });
+    }
   } catch (error) {
     response.status(500).send(error);
   }
@@ -40,7 +57,8 @@ router.get("/user", authenticateToken, async (request, response) => {
 
     const userResponse = {
       email: user.email,
-      name: user.name,
+      firstName: user.name || user.firstName,
+      lastName: user.lastName ?? "",
       isAdmin: user.isAdmin,
     };
 
@@ -133,7 +151,6 @@ router.post("/assignFiles", authenticateToken, async (request, response) => {
 
 router.post("/findPeaks", authenticateToken, (request, response) => {
   const { data } = request.body;
-  console.log(data);
 
   const pythonScriptPath = path.join(
     __dirname,
@@ -143,22 +160,18 @@ router.post("/findPeaks", authenticateToken, (request, response) => {
   );
   const pythonProcess = spawn("python3", [pythonScriptPath]);
 
-  // Send EEG data to the Python process
   pythonProcess.stdin.write(JSON.stringify(data));
   pythonProcess.stdin.end();
 
-  // Capture output from the Python process
   let result = "";
   pythonProcess.stdout.on("data", (data) => {
     result += data;
   });
 
-  // Handle errors
   pythonProcess.stderr.on("data", (data) => {
     console.error(`Error: ${data}`);
   });
 
-  // Handle process exit
   pythonProcess.on("close", (code) => {
     const parsedResult = JSON.parse(result);
     console.log("Detected Peaks:", parsedResult);
