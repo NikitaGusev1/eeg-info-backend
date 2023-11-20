@@ -1,63 +1,42 @@
 import json
 import numpy as np
-from scipy.signal import find_peaks, butter, filtfilt
 from scipy.ndimage import grey_erosion, grey_dilation
+from scipy.signal import find_peaks
 
-def detect_peaks_morphological(eeg_data, threshold=0.5, window_size=11):
-    # Apply a bandpass filter to the EEG signal
-    filtered_eeg = bandpass_filter(eeg_data)
+def detect_peaks(eeg_signal, open_size=5, close_size=5, threshold=3.0):
+    def grey_opening(signal):
+        eroded_signal = grey_erosion(signal, size=(open_size,))
+        opened_signal = grey_dilation(eroded_signal, size=(open_size,))
+        return opened_signal
 
-    # Apply closing operation to smooth the signal from above
-    smoothed_signal = closing_operation(filtered_eeg, window_size)
+    def grey_closing(signal):
+        dilated_signal = grey_dilation(signal, size=(close_size,))
+        closed_signal = grey_erosion(dilated_signal, size=(close_size,))
+        return closed_signal
 
-    # Apply erosion to further shape the signal
-    eroded_signal = erosion_operation(smoothed_signal, window_size)
+    def close_opening(signal):
+        closed_signal = grey_closing(signal)
+        opened_closed_signal = grey_opening(closed_signal)
+        return opened_closed_signal
 
-    # Apply dilation to enhance peaks
-    dilated_signal = dilation_operation(eroded_signal, window_size)
+    def open_closing(signal):
+        opened_signal = grey_opening(signal)
+        closed_opened_signal = grey_closing(opened_signal)
+        return closed_opened_signal
 
-    # Find peaks in the enhanced signal
-    peaks, _ = find_peaks(dilated_signal, height=threshold)
+    def average_of_operators(signal, operator1, operator2):
+        result1 = operator1(signal)
+        result2 = operator2(signal)
+        averaged_signal = (result1 + result2) / 2.0
+        return averaged_signal
 
-    return peaks.tolist()
+    filtered_signal = average_of_operators(eeg_signal, close_opening, open_closing)
+    peaks, _ = find_peaks(filtered_signal, height=threshold)
+    peaks_list = peaks.tolist()
 
-def bandpass_filter(eeg_data, lowcut=0.5, highcut=50.0, fs=1000.0, order=4):
-    # Design a bandpass filter
-    nyquist = 0.5 * fs
-    low = lowcut / nyquist
-    high = highcut / nyquist
-    b, a = butter(order, [low, high], btype='band')
-
-    # Apply the bandpass filter using filtfilt for zero-phase filtering
-    filtered_data = filtfilt(b, a, eeg_data)
-
-    return filtered_data
-
-def closing_operation(signal, window_size):
-    # Apply closing operation to smooth the signal from above
-    struct_element = np.ones(window_size)
-    smoothed_signal = filtfilt(struct_element, 1, signal)
-
-    return smoothed_signal
-
-def erosion_operation(signal, window_size):
-    # Apply erosion operation to shape the signal
-    eroded_signal = grey_erosion(signal, size=window_size)
-
-    return eroded_signal
-
-def dilation_operation(signal, window_size):
-    # Apply dilation operation to enhance peaks
-    dilated_signal = grey_dilation(signal, size=window_size)
-
-    return dilated_signal
+    return peaks_list
 
 if __name__ == "__main__":
-    # Read input from Node.js
-    input_data = json.loads(input())
-
-    # Process EEG data and detect peaks
-    result = detect_peaks_morphological(input_data)
-
-    # Send the result back to Node.js
+    signal = json.loads(input())
+    result = detect_peaks(signal)
     print(json.dumps(result))
