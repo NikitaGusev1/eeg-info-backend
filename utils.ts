@@ -8,7 +8,7 @@ function generateToken(user) {
     isAdmin: user.isAdmin,
   };
 
-  return jwt.sign(payload, jwtSecretKey, { expiresIn: "1h" });
+  return jwt.sign(payload, jwtSecretKey, { expiresIn: "72h" });
 }
 
 function verifyToken(token) {
