@@ -150,7 +150,7 @@ router.post("/assignFiles", authenticateToken, async (request, response) => {
 });
 
 router.post("/findPeaks", authenticateToken, (request, response) => {
-  const { data } = request.body;
+  const { signal, samplingFrequency } = request.body.data;
 
   const pythonScriptPath = path.join(
     __dirname,
@@ -160,10 +160,32 @@ router.post("/findPeaks", authenticateToken, (request, response) => {
   );
   const pythonProcess = spawn("python3", [pythonScriptPath]);
 
-  pythonProcess.stdin.write(JSON.stringify(data));
-  pythonProcess.stdin.end();
+  const inputData = { signal, samplingFrequency };
+  const inputJSON = JSON.stringify(inputData);
+
+  // Check if the Python process is still running
+  if (!pythonProcess.killed) {
+    // Write to the standard input
+    pythonProcess.stdin.write(inputJSON);
+    pythonProcess.stdin.end();
+  } else {
+    console.error("Python process has already exited.");
+    response
+      .status(500)
+      .json({ success: false, error: "Internal Server Error" });
+    return;
+  }
 
   let result = "";
+
+  // Handle errors during the writing process
+  pythonProcess.stdin.on("error", (error) => {
+    console.error(`Error writing to Python process: ${error.message}`);
+    response
+      .status(500)
+      .json({ success: false, error: "Internal Server Error" });
+  });
+
   pythonProcess.stdout.on("data", (data) => {
     result += data;
   });
@@ -173,8 +195,20 @@ router.post("/findPeaks", authenticateToken, (request, response) => {
   });
 
   pythonProcess.on("close", (code) => {
-    const parsedResult = JSON.parse(result);
-    console.log("Detected Peaks:", parsedResult);
+    try {
+      const parsedResult = JSON.parse(result);
+      console.log(parsedResult);
+
+      console.log("Detected Peaks:", parsedResult.peaks_count);
+      console.log("Debug Information:", parsedResult.debug_info);
+
+      response.json({ success: true, peaks: parsedResult });
+    } catch (error) {
+      console.error("Error parsing JSON result:", error.message);
+      response
+        .status(500)
+        .json({ success: false, error: "Internal Server Error" });
+    }
   });
 });
 
