@@ -1,89 +1,89 @@
 import json
-import sys
 import numpy as np
+from scipy.signal import find_peaks
 from scipy.ndimage import grey_erosion, grey_dilation
-from scipy.signal import find_peaks, firwin, lfilter
 
-def apply_structuring_element(signal, a, b):
-    signal_array = np.array(signal)
-    return a * signal_array**2 + b
+def detect_eeg_peaks(signal, sampling_frequency=256.0):
+    # Define a function to generate parabola-shaped structuring elements
+    def generate_parabola_structuring_elements(signal):
+        # Calculate the widths of arcs
+        widths, _ = find_peaks(signal, distance=10)  # Adjust distance as needed
 
-def apply_fir_filter(signal, sampling_frequency, cutoff_frequency=30.0):
-    nyquist = 0.5 * sampling_frequency
-    num_taps = 101  # Adjust the number of taps as needed
-    cutoff = cutoff_frequency / nyquist
-    fir_coefficients = firwin(num_taps, cutoff, window='hamming')
-    filtered_signal = lfilter(fir_coefficients, 1.0, signal)
-    return filtered_signal
+        # Calculate heights of the structuring elements
+        h1 = np.median(np.abs(signal))
+        h2 = 2 * np.median(np.abs(signal))
 
-def calculate_threshold(signal):
-    extrema = np.concatenate((np.where(np.diff(signal) > 0)[0], np.where(np.diff(signal) < 0)[0]))
-    extrema = extrema[(extrema > 0) & (extrema < len(signal) - 1)]
-    
-    # Calculate the threshold as 8 times the average of the absolute values of extrema
-    threshold = 8 * np.mean(np.abs(signal[extrema]))
-    
-    return threshold
+        # Calculate widths of the structuring elements
+        w1 = 0.5 * np.median(widths)
+        w2 = 1.5 * np.median(widths)
 
-def detect_peaks(eeg_signal, sampling_frequency, duration_minutes=1, open_size=10, close_size=5):
-    # Constants for structuring elements
-    a1, b1 = 1.0, 1.0
-    a2, b2 = 1.0, 1.0
+        # Calculate parameters for the parabolas
+        b1 = np.median(np.abs(signal))
+        b2 = np.median(np.abs(signal))
+        a1 = np.median(np.abs(signal)) / (0.5 * np.median(widths))
+        a2 = np.median(np.abs(signal)) / (1.5 * np.median(widths))
 
-    # Apply the structuring elements to the original signal
-    g1_signal = apply_structuring_element(eeg_signal, a1, b1)
-    g2_signal = apply_structuring_element(eeg_signal, a2, b2)
+        # Define the parabola-shaped structuring elements
+        g1 = lambda t: a1 * t**2 + b1
+        g2 = lambda t: a2 * t**2 + b2
 
-    # Apply FIR filter to the signals
-    g1_signal_filtered = apply_fir_filter(g1_signal, sampling_frequency)
-    g2_signal_filtered = apply_fir_filter(g2_signal, sampling_frequency)
+        return g1, g2
 
-    # Apply opening and closing operations to the filtered signals
-    opened_g1_signal = grey_dilation(grey_erosion(g1_signal_filtered, size=(open_size,)), size=(open_size,))
-    closed_g2_signal = grey_erosion(grey_dilation(g2_signal_filtered, size=(close_size,)), size=(close_size,))
+    # Define a function for opening operation
+    def opening_operation(signal, structuring_element):
+        erosion_result = grey_erosion(signal, structure=structuring_element)
+        dilation_result = grey_dilation(erosion_result, structure=structuring_element)
+        return dilation_result
 
-    # Calculate the average of the two signals
-    averaged_signal = (opened_g1_signal + closed_g2_signal) / 2.0
+    # Define a function for closing operation
+    def closing_operation(signal, structuring_element):
+        dilation_result = grey_dilation(signal, structure=structuring_element)
+        erosion_result = grey_erosion(dilation_result, structure=structuring_element)
+        return erosion_result
+
+    # Define a function for average OC/CO operation
+    def average_occo(signal, structuring_element):
+        opening_result = opening_operation(signal, structuring_element)
+        closing_result = closing_operation(signal, structuring_element)
+        occo_result = (opening_result + closing_result) / 2
+        return occo_result
+
+    # Define a function to apply the filter
+    def apply_filter(signal, structuring_element):
+        occo_result = average_occo(signal, structuring_element)
+        filtered_signal = signal - occo_result
+        return filtered_signal
+
+    # Define a function to calculate the threshold
+    def calculate_threshold(filtered_signal):
+        extrema_amplitudes = np.abs(filtered_signal[find_peaks(filtered_signal)[0]])
+        threshold = 8 * np.median(extrema_amplitudes)
+        return threshold
+
+    # Generate parabola-shaped structuring elements
+    g1, g2 = generate_parabola_structuring_elements(signal)
+
+    # Apply the filter to the original EEG signal
+    filtered_signal = apply_filter(signal, g1)
 
     # Calculate the threshold
-    threshold = calculate_threshold(averaged_signal)
+    threshold = calculate_threshold(filtered_signal)
 
-    # Convert duration from minutes to number of samples
-    # duration_samples = int(duration_minutes * sampling_frequency * 60)
-
-    # Find peaks using the calculated threshold and duration
-    # peaks, _ = find_peaks(averaged_signal, height=threshold, distance=duration_samples)
-    peaks, _ = find_peaks(averaged_signal, height=threshold)
-    peaks_count = len(peaks)
+    # Count the peaks above the threshold
+    detected_peaks = len(find_peaks(filtered_signal, height=threshold)[0])
 
     result = {
-        "peaks_count": peaks_count,
-        "debug_info": {
-            "threshold": threshold,
-            "sampling_frequency": sampling_frequency
-            # "opened_g1_signal": opened_g1_signal.tolist(),
-            # "closed_g2_signal": closed_g2_signal.tolist(),
-            # "averaged_signal": averaged_signal.tolist(),
-        }  # Add any additional debug information as needed
+        "peaks_count": detected_peaks,
+        "debug_info": "Additional debug information if needed",
     }
 
-    return result
+    print(json.dumps(result))
 
 if __name__ == "__main__":
-    try:
-        input_data = json.loads(sys.stdin.read())
+    # Read input data from standard input
+    input_data = json.loads(input())
+    signal = input_data.get("signal", [])
+    sampling_frequency = input_data.get("samplingFrequency", 256.0)  # Default to 256.0 if not provided
 
-        # Check for required fields
-        if "signal" not in input_data or "samplingFrequency" not in input_data:
-            raise ValueError("Missing required fields in input data")
-
-        signal = input_data["signal"]
-        sampling_frequency = input_data["samplingFrequency"]
-        # duration_minutes = input_data.get("durationMinutes", 1)
-
-        # result = detect_peaks(signal, sampling_frequency, duration_minutes)
-        result = detect_peaks(signal, sampling_frequency)
-
-        print(json.dumps(result))
-    except Exception as e:
-        print(json.dumps({"error": str(e)}))
+    # Call the function with the provided parameters
+    detect_eeg_peaks(signal, sampling_frequency)
