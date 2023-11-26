@@ -23,9 +23,9 @@ def detect_eeg_peaks(signal, sampling_frequency=256.0):
         a1 = np.median(np.abs(signal)) / (0.5 * np.median(widths))
         a2 = np.median(np.abs(signal)) / (1.5 * np.median(widths))
 
-        # Define the parabola-shaped structuring elements
-        g1 = lambda t: a1 * t**2 + b1
-        g2 = lambda t: a2 * t**2 + b2
+        # Define the parabola-shaped structuring elements using np.vectorize
+        g1 = np.vectorize(lambda t: a1 * t**2 + b1)
+        g2 = np.vectorize(lambda t: a2 * t**2 + b2)
 
         return g1, g2
 
