@@ -42,8 +42,9 @@ def detect_eeg_peaks(signal):
     # Calculate the threshold
     threshold = calculate_threshold(filtered_signal)
 
-    # Count the peaks above the threshold
-    detected_peaks_indices = find_peaks(filtered_signal, height=threshold)[0]
+    # Count the peaks above the threshold with width and prominence criteria
+    detected_peaks_indices, _ = find_peaks(filtered_signal, height=threshold, width=40, prominence=237)
+
     detected_peaks_count = len(detected_peaks_indices)
 
     result = {
