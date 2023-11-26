@@ -89,13 +89,16 @@ if __name__ == "__main__":
         input_data = json.loads(sys.stdin.read())
 
         # Check for required fields
-        if "signal" not in input_data or "samplingFrequency" not in input_data:
+        # if "signal" not in input_data or "samplingFrequency" not in input_data:
+        #     raise ValueError("Missing required fields in input data")
+        # Check for required fields
+        if "signal" not in input_data:
             raise ValueError("Missing required fields in input data")
 
         signal = input_data["signal"]
-        sampling_frequency = input_data["samplingFrequency"]
+        # sampling_frequency = input_data["samplingFrequency"]
 
-        result = detect_peaks(signal, sampling_frequency)
+        result = detect_eeg_peaks(signal)
 
         print(json.dumps(result))
     except Exception as e:

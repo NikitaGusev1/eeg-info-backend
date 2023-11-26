@@ -198,6 +198,7 @@ router.post("/findPeaks", authenticateToken, (request, response) => {
   pythonProcess.on("close", (code) => {
     try {
       const parsedResult = JSON.parse(result);
+      console.log(parsedResult);
 
       console.log("Detected Peaks:", parsedResult.peaks_count);
       console.log("Debug Information:", parsedResult.debug_info);
