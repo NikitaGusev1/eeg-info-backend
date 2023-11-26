@@ -4,9 +4,9 @@ import numpy as np
 from scipy.signal import find_peaks
 from scipy.ndimage import grey_erosion, grey_dilation
 
-def detect_eeg_peaks(signal):
-    print(f"Type of signal: {type(signal)}")
-    print(f"Content of signal: {signal}")
+def detect_eeg_peaks(signal, sampling_frequency):
+    # print(f"Type of signal: {type(signal)}")
+    # print(f"Content of signal: {signal}")
     # Define a function to generate parabola-shaped structuring elements
     def generate_parabola_structuring_elements(signal):
         # Calculate the widths of arcs
@@ -89,16 +89,13 @@ if __name__ == "__main__":
         input_data = json.loads(sys.stdin.read())
 
         # Check for required fields
-        # if "signal" not in input_data or "samplingFrequency" not in input_data:
-        #     raise ValueError("Missing required fields in input data")
-        # Check for required fields
-        if "signal" not in input_data:
+        if "signal" not in input_data or "samplingFrequency" not in input_data:
             raise ValueError("Missing required fields in input data")
 
         signal = input_data["signal"]
-        # sampling_frequency = input_data["samplingFrequency"]
+        sampling_frequency = input_data["samplingFrequency"]
 
-        result = detect_eeg_peaks(signal)
+        result = detect_eeg_peaks(signal, sampling_frequency)
 
         print(json.dumps(result))
     except Exception as e:

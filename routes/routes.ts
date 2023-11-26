@@ -160,31 +160,52 @@ router.post("/findPeaks", authenticateToken, (request, response) => {
   );
   const pythonProcess = spawn("python3", [pythonScriptPath]);
 
-  // const inputData = { signal, samplingFrequency };
-  const inputData = { signal };
+  const inputData = { signal, samplingFrequency };
   const inputJSON = JSON.stringify(inputData);
+  console.log(inputJSON);
 
-  // Check if the Python process is still running
-  if (!pythonProcess.killed) {
-    // Write to the standard input
-    pythonProcess.stdin.write(inputJSON);
-    pythonProcess.stdin.end();
-  } else {
-    console.error("Python process has already exited.");
-    response
-      .status(500)
-      .json({ success: false, error: "Internal Server Error" });
-    return;
-  }
+  // Write to the standard input
+  pythonProcess.stdin.write(inputJSON);
+  pythonProcess.stdin.end();
 
   let result = "";
+  let error = "";
 
-  // Handle errors during the writing process
-  pythonProcess.stdin.on("error", (error) => {
-    console.error(`Error writing to Python process: ${error.message}`);
-    response
-      .status(500)
-      .json({ success: false, error: "Internal Server Error" });
+  // Handle process termination
+  pythonProcess.on("exit", (code) => {
+    if (code === null) {
+      console.error("Python process exited prematurely or with an error");
+      response
+        .status(500)
+        .json({ success: false, error: "Internal Server Error" });
+    } else {
+      try {
+        const parsedResult = JSON.parse(result);
+        console.log(parsedResult);
+
+        if (
+          parsedResult &&
+          typeof parsedResult === "object" &&
+          "peaks_count" in parsedResult
+        ) {
+          // console.log("Detected Peaks:", parsedResult.peaks_count);
+          // console.log("Threshold Used:", parsedResult.threshold_used);
+          console.log(parsedResult);
+
+          // response.json({ success: true, peaks: parsedResult });
+        } else {
+          console.error("Invalid JSON format in Python script output.");
+          response
+            .status(500)
+            .json({ success: false, error: "Internal Server Error" });
+        }
+      } catch (err) {
+        console.error("Error parsing JSON result:", err.message);
+        response
+          .status(500)
+          .json({ success: false, error: "Internal Server Error" });
+      }
+    }
   });
 
   pythonProcess.stdout.on("data", (data) => {
@@ -192,24 +213,14 @@ router.post("/findPeaks", authenticateToken, (request, response) => {
   });
 
   pythonProcess.stderr.on("data", (data) => {
-    console.error(`Error: ${data}`);
+    error += data;
   });
 
-  pythonProcess.on("close", (code) => {
-    try {
-      const parsedResult = JSON.parse(result);
-      console.log(parsedResult);
-
-      console.log("Detected Peaks:", parsedResult.peaks_count);
-      console.log("Debug Information:", parsedResult.debug_info);
-
-      response.json({ success: true, peaks: parsedResult });
-    } catch (error) {
-      console.error("Error parsing JSON result:", error.message);
-      response
-        .status(500)
-        .json({ success: false, error: "Internal Server Error" });
-    }
+  pythonProcess.on("error", (err) => {
+    console.error(`Python process error: ${err.message}`);
+    response
+      .status(500)
+      .json({ success: false, error: "Internal Server Error" });
   });
 });
 
