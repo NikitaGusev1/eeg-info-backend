@@ -160,7 +160,8 @@ router.post("/findPeaks", authenticateToken, (request, response) => {
   );
   const pythonProcess = spawn("python3", [pythonScriptPath]);
 
-  const inputData = { signal, samplingFrequency };
+  // const inputData = { signal, samplingFrequency };
+  const inputData = { signal };
   const inputJSON = JSON.stringify(inputData);
 
   // Check if the Python process is still running

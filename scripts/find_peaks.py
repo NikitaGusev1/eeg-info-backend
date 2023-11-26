@@ -1,9 +1,10 @@
 import json
+import sys
 import numpy as np
 from scipy.signal import find_peaks
 from scipy.ndimage import grey_erosion, grey_dilation
 
-def detect_eeg_peaks(signal, sampling_frequency=256.0):
+def detect_eeg_peaks(signal):
     # Define a function to generate parabola-shaped structuring elements
     def generate_parabola_structuring_elements(signal):
         # Calculate the widths of arcs
@@ -23,22 +24,22 @@ def detect_eeg_peaks(signal, sampling_frequency=256.0):
         a1 = np.median(np.abs(signal)) / (0.5 * np.median(widths))
         a2 = np.median(np.abs(signal)) / (1.5 * np.median(widths))
 
-        # Define the parabola-shaped structuring elements using np.vectorize
-        g1 = np.vectorize(lambda t: a1 * t**2 + b1)
-        g2 = np.vectorize(lambda t: a2 * t**2 + b2)
+        # Define the parabola-shaped structuring elements
+        g1 = lambda t: a1 * t**2 + b1
+        g2 = lambda t: a2 * t**2 + b2
 
         return g1, g2
 
     # Define a function for opening operation
     def opening_operation(signal, structuring_element):
-        erosion_result = grey_erosion(signal, structure=np.array(structuring_element))
-        dilation_result = grey_dilation(erosion_result, structure=np.array(structuring_element))
+        erosion_result = grey_erosion(signal, structure=structuring_element(np.arange(len(signal))))
+        dilation_result = grey_dilation(erosion_result, structure=structuring_element(np.arange(len(signal))))
         return dilation_result
 
     # Define a function for closing operation
     def closing_operation(signal, structuring_element):
-        dilation_result = grey_dilation(signal, structure=np.array(structuring_element))
-        erosion_result = grey_erosion(dilation_result, structure=np.array(structuring_element))
+        dilation_result = grey_dilation(signal, structure=structuring_element(np.arange(len(signal))))
+        erosion_result = grey_erosion(dilation_result, structure=structuring_element(np.arange(len(signal))))
         return erosion_result
 
     # Define a function for average OC/CO operation
@@ -70,20 +71,23 @@ def detect_eeg_peaks(signal, sampling_frequency=256.0):
     threshold = calculate_threshold(filtered_signal)
 
     # Count the peaks above the threshold
-    detected_peaks = len(find_peaks(filtered_signal, height=threshold)[0])
+    detected_peaks_indices = find_peaks(filtered_signal, height=threshold)[0]
+    detected_peaks_count = len(detected_peaks_indices)
 
     result = {
-        "peaks_count": detected_peaks,
-        "debug_info": "Additional debug information if needed",
+        "peaks_count": detected_peaks_count,
+        "peaks_array": detected_peaks_indices.tolist(),
     }
+    # result = detected_peaks_count
 
-    print(json.dumps(result))
+    return result
 
 if __name__ == "__main__":
     # Read input data from standard input
-    input_data = json.loads(input())
-    signal = input_data.get("signal", [])
-    sampling_frequency = input_data.get("samplingFrequency", 256.0)  # Default to 256.0 if not provided
+    # input_data = json.loads(input())
+    signal = json.loads(input())
 
     # Call the function with the provided parameters
-    detect_eeg_peaks(signal, sampling_frequency)
+    result = detect_eeg_peaks(signal)
+    print(json.dumps(result))
+    sys.stdout.flush()  # Ensure the output is flushed
