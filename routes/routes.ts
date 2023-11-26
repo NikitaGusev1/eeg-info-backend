@@ -162,7 +162,7 @@ router.post("/findPeaks", authenticateToken, (request, response) => {
 
   const inputData = { signal, samplingFrequency };
   const inputJSON = JSON.stringify(inputData);
-  console.log(inputJSON);
+  // console.log(inputJSON);
 
   // Write to the standard input
   pythonProcess.stdin.write(inputJSON);

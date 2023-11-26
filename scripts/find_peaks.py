@@ -78,7 +78,7 @@ def detect_eeg_peaks(signal, sampling_frequency):
 
     result = {
         "peaks_count": detected_peaks_count,
-        "peaks_array": detected_peaks_indices.tolist(),
+        # "peaks_array": detected_peaks_indices.tolist(),
     }
     # result = detected_peaks_count
 
