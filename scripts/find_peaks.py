@@ -25,7 +25,7 @@ def calculate_threshold(signal):
     
     return threshold
 
-def detect_peaks(eeg_signal, sampling_frequency, duration_minutes=1, open_size=5, close_size=5):
+def detect_peaks(eeg_signal, sampling_frequency, duration_minutes=1, open_size=10, close_size=5):
     # Constants for structuring elements
     a1, b1 = 1.0, 1.0
     a2, b2 = 1.0, 1.0
@@ -45,20 +45,26 @@ def detect_peaks(eeg_signal, sampling_frequency, duration_minutes=1, open_size=5
     # Calculate the average of the two signals
     averaged_signal = (opened_g1_signal + closed_g2_signal) / 2.0
 
+    # Calculate the threshold
     threshold = calculate_threshold(averaged_signal)
 
-    # Find peaks using the calculated threshold
-    peaks, _ = find_peaks(averaged_signal, height=calculate_threshold(averaged_signal))
+    # Convert duration from minutes to number of samples
+    # duration_samples = int(duration_minutes * sampling_frequency * 60)
+
+    # Find peaks using the calculated threshold and duration
+    # peaks, _ = find_peaks(averaged_signal, height=threshold, distance=duration_samples)
+    peaks, _ = find_peaks(averaged_signal, height=threshold)
     peaks_count = len(peaks)
 
     result = {
         "peaks_count": peaks_count,
         "debug_info": {
             "threshold": threshold,
-            "opened_g1_signal": opened_g1_signal.tolist(),
-            "closed_g2_signal": closed_g2_signal.tolist(),
-            "averaged_signal": averaged_signal.tolist(),
-            }  # Add any additional debug information as needed
+            "sampling_frequency": sampling_frequency
+            # "opened_g1_signal": opened_g1_signal.tolist(),
+            # "closed_g2_signal": closed_g2_signal.tolist(),
+            # "averaged_signal": averaged_signal.tolist(),
+        }  # Add any additional debug information as needed
     }
 
     return result
@@ -73,7 +79,9 @@ if __name__ == "__main__":
 
         signal = input_data["signal"]
         sampling_frequency = input_data["samplingFrequency"]
+        # duration_minutes = input_data.get("durationMinutes", 1)
 
+        # result = detect_peaks(signal, sampling_frequency, duration_minutes)
         result = detect_peaks(signal, sampling_frequency)
 
         print(json.dumps(result))
