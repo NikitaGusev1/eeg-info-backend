@@ -17,21 +17,12 @@ def apply_fir_filter(signal, sampling_frequency, cutoff_frequency=30.0):
     return filtered_signal
 
 def calculate_threshold(signal):
-    # Find the indices of extrema (peaks and troughs)
-    diff_signal = np.diff(signal)
-    extrema_up = np.where(diff_signal > 0)[0] + 1  # Add 1 to get the correct index for peaks
-    extrema_down = np.where(diff_signal < 0)[0] + 1  # Add 1 to get the correct index for troughs
-    extrema = np.concatenate((extrema_up, extrema_down))
-
-    # Ensure extrema indices are within the valid range
+    extrema = np.concatenate((np.where(np.diff(signal) > 0)[0], np.where(np.diff(signal) < 0)[0]))
     extrema = extrema[(extrema > 0) & (extrema < len(signal) - 1)]
-
-    # Calculate the average value of the absolute extrema
-    avg_extrema = np.mean(np.abs(signal[extrema]))
-
-    # Calculate the threshold as 8 times the average of the absolute extrema
-    threshold = 8 * avg_extrema
-
+    
+    # Calculate the threshold as 8 times the average of the absolute values of extrema
+    threshold = 8 * np.mean(np.abs(signal[extrema]))
+    
     return threshold
 
 def detect_peaks(eeg_signal, sampling_frequency, duration_minutes=1, open_size=5, close_size=5):
@@ -54,13 +45,20 @@ def detect_peaks(eeg_signal, sampling_frequency, duration_minutes=1, open_size=5
     # Calculate the average of the two signals
     averaged_signal = (opened_g1_signal + closed_g2_signal) / 2.0
 
+    threshold = calculate_threshold(averaged_signal)
+
     # Find peaks using the calculated threshold
     peaks, _ = find_peaks(averaged_signal, height=calculate_threshold(averaged_signal))
     peaks_count = len(peaks)
 
     result = {
         "peaks_count": peaks_count,
-        "debug_info": {}  # Add any additional debug information as needed
+        "debug_info": {
+            "threshold": threshold,
+            "opened_g1_signal": opened_g1_signal.tolist(),
+            "closed_g2_signal": closed_g2_signal.tolist(),
+            "averaged_signal": averaged_signal.tolist(),
+            }  # Add any additional debug information as needed
     }
 
     return result
