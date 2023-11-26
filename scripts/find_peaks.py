@@ -85,11 +85,18 @@ def detect_eeg_peaks(signal):
     return result
 
 if __name__ == "__main__":
-    # Read input data from standard input
-    # input_data = json.loads(input())
-    signal = json.loads(input())
+    try:
+        input_data = json.loads(sys.stdin.read())
 
-    # Call the function with the provided parameters
-    result = detect_eeg_peaks(signal)
-    print(json.dumps(result))
-    sys.stdout.flush()  # Ensure the output is flushed
+        # Check for required fields
+        if "signal" not in input_data or "samplingFrequency" not in input_data:
+            raise ValueError("Missing required fields in input data")
+
+        signal = input_data["signal"]
+        sampling_frequency = input_data["samplingFrequency"]
+
+        result = detect_peaks(signal, sampling_frequency)
+
+        print(json.dumps(result))
+    except Exception as e:
+        print(json.dumps({"error": str(e)}))
