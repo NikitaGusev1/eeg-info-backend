@@ -5,6 +5,8 @@ from scipy.signal import find_peaks
 from scipy.ndimage import grey_erosion, grey_dilation
 
 def detect_eeg_peaks(signal):
+    print(f"Type of signal: {type(signal)}")
+    print(f"Content of signal: {signal}")
     # Define a function to generate parabola-shaped structuring elements
     def generate_parabola_structuring_elements(signal):
         # Calculate the widths of arcs
