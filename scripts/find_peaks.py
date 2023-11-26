@@ -31,14 +31,14 @@ def detect_eeg_peaks(signal, sampling_frequency=256.0):
 
     # Define a function for opening operation
     def opening_operation(signal, structuring_element):
-        erosion_result = grey_erosion(signal, structure=structuring_element)
-        dilation_result = grey_dilation(erosion_result, structure=structuring_element)
+        erosion_result = grey_erosion(signal, structure=np.array(structuring_element))
+        dilation_result = grey_dilation(erosion_result, structure=np.array(structuring_element))
         return dilation_result
 
     # Define a function for closing operation
     def closing_operation(signal, structuring_element):
-        dilation_result = grey_dilation(signal, structure=structuring_element)
-        erosion_result = grey_erosion(dilation_result, structure=structuring_element)
+        dilation_result = grey_dilation(signal, structure=np.array(structuring_element))
+        erosion_result = grey_erosion(dilation_result, structure=np.array(structuring_element))
         return erosion_result
 
     # Define a function for average OC/CO operation
