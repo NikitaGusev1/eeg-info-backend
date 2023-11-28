@@ -1,10 +1,19 @@
 import json
 import sys
 import numpy as np
-from scipy.signal import find_peaks
+from scipy.signal import find_peaks, butter, filtfilt
 from scipy.ndimage import grey_erosion, grey_dilation
 
-def detect_eeg_peaks(signal):
+def detect_eeg_peaks(signal, sampling_frequency):
+    # Define a function to design a bandpass filter
+    def bandpass_filter(signal, sampling_frequency, lowcut, highcut, order=4):
+        nyquist = 0.5 * sampling_frequency
+        low = lowcut / nyquist
+        high = highcut / nyquist
+        b, a = butter(order, [low, high], btype='band')
+        filtered_signal = filtfilt(b, a, signal)
+        return filtered_signal
+
     # Define a function for opening operation
     def opening_operation(signal, distance):
         erosion_result = grey_erosion(signal, size=distance)
@@ -25,8 +34,10 @@ def detect_eeg_peaks(signal):
         return occo_result
 
     # Define a function to apply the filter
-    def apply_filter(signal, distance):
-        occo_result = average_occo(signal, distance)
+    def apply_filter(signal, distance, sampling_frequency):
+        # Apply bandpass filter to focus on the 49-51 Hz frequency range
+        filtered_signal = bandpass_filter(signal, sampling_frequency, 49, 51)
+        occo_result = average_occo(filtered_signal, distance)
         filtered_signal = signal - occo_result
         return filtered_signal
 
@@ -37,7 +48,7 @@ def detect_eeg_peaks(signal):
         return threshold
 
     # Apply the filter to the original EEG signal
-    filtered_signal = apply_filter(signal, distance=len(signal)//10)  # Adjust the distance as needed
+    filtered_signal = apply_filter(signal, distance=len(signal)//10, sampling_frequency=sampling_frequency)
 
     # Calculate the threshold
     threshold = calculate_threshold(filtered_signal)
@@ -58,13 +69,13 @@ if __name__ == "__main__":
     try:
         input_data = json.loads(sys.stdin.read())
 
-        # Check for required fields
-        if "signal" not in input_data:
+        if "signal" not in input_data or "samplingFrequency" not in input_data:
             raise ValueError("Missing required fields in input data")
 
         signal = input_data["signal"]
+        sampling_frequency = input_data["samplingFrequency"]
 
-        result = detect_eeg_peaks(signal)
+        result = detect_eeg_peaks(signal, sampling_frequency)
 
         print(json.dumps(result))
     except Exception as e:
