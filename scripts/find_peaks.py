@@ -4,7 +4,7 @@ import numpy as np
 from scipy.signal import find_peaks, butter, filtfilt
 from scipy.ndimage import grey_erosion, grey_dilation
 
-def detect_eeg_peaks(signals):
+def detect_eeg_peaks(signals, start_minute=4, duration_minutes=1):
     # Define a function for opening operation
     def opening_operation(signal, distance):
         erosion_result = grey_erosion(signal, size=distance)
@@ -39,14 +39,21 @@ def detect_eeg_peaks(signals):
         signal = signal_data["signal"]
         sampling_frequency = signal_data["samplingFrequency"]
 
-        # Apply the filter to the original EEG signal
-        filtered_signal = apply_filter(signal, distance=len(signal)//10, sampling_frequency=sampling_frequency)
+        # Calculate the start and end indices for the specified duration
+        start_index = int(start_minute * 60 * sampling_frequency)
+        end_index = start_index + int(duration_minutes * 60 * sampling_frequency)
+
+        # Trim the signal to the specified duration
+        trimmed_signal = signal[start_index:end_index]
+
+        # Apply the filter to the trimmed EEG signal
+        filtered_signal = apply_filter(trimmed_signal, distance=len(trimmed_signal)//10, sampling_frequency=sampling_frequency)
 
         # Calculate the threshold
         threshold = 8 * np.median(np.abs(filtered_signal[find_peaks(filtered_signal)[0]]))
 
         # Count the peaks above the threshold with width and prominence criteria
-        detected_peaks_indices, _ = find_peaks(filtered_signal, height=threshold, width=40, prominence=260)
+        detected_peaks_indices, _ = find_peaks(filtered_signal, height=threshold, width=5, prominence=249)
 
         total_peaks += len(detected_peaks_indices)
 
@@ -64,8 +71,10 @@ if __name__ == "__main__":
             raise ValueError("Missing required fields in input data")
 
         signals = input_data["signals"]
+        start_minute = input_data.get("startMinute", 1)
+        duration_minutes = input_data.get("durationMinutes", 1)
 
-        result = detect_eeg_peaks(signals)
+        result = detect_eeg_peaks(signals, start_minute, duration_minutes)
 
         print(json.dumps(result))
     except Exception as e:
