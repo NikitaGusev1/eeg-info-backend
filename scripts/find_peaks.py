@@ -30,11 +30,13 @@ def detect_eeg_peaks(signals, start_minute=3, duration_minutes=1):
         occo_result = (opening_result + closing_result) / 2
         return occo_result
 
-    # Function to apply the filter
+    # Function to apply the filter and calculate the threshold
     def apply_filter(signal, distance, sampling_frequency):
         occo_result = average_occo(signal, distance)
         filtered_signal = signal - occo_result
-        return filtered_signal
+        # Calculate the threshold based on the formula
+        threshold = 8 * np.median(np.abs(filtered_signal[find_peaks(filtered_signal)[0]]))
+        return filtered_signal, threshold
 
     total_peaks = 0
 
@@ -47,10 +49,7 @@ def detect_eeg_peaks(signals, start_minute=3, duration_minutes=1):
 
         trimmed_signal = trim_signal(signal, sampling_frequency, start_minute, duration_minutes)
 
-        filtered_signal = apply_filter(trimmed_signal, distance=len(trimmed_signal)//10, sampling_frequency=sampling_frequency)
-
-        # Calculate the threshold based on the formula
-        threshold = 8 * np.median(np.abs(filtered_signal[find_peaks(filtered_signal)[0]]))
+        filtered_signal, threshold = apply_filter(trimmed_signal, distance=len(trimmed_signal)//10, sampling_frequency=sampling_frequency)
 
         # Count the peaks above the threshold with width and prominence criteria
         detected_peaks_indices, _ = find_peaks(filtered_signal, height=threshold, width=40, prominence=260)
