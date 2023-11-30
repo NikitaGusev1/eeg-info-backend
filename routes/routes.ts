@@ -150,78 +150,97 @@ router.post("/assignFiles", authenticateToken, async (request, response) => {
 });
 
 router.post("/findPeaks", authenticateToken, (request, response) => {
-  const { signal, samplingFrequency } = request.body.data;
+  try {
+    const { data } = request.body;
 
-  const pythonScriptPath = path.join(
-    __dirname,
-    "..",
-    "scripts",
-    "find_peaks.py"
-  );
-  const pythonProcess = spawn("python3", [pythonScriptPath]);
+    if (!Array.isArray(data)) {
+      return response
+        .status(400)
+        .json({ success: false, error: "Invalid data format" });
+    }
 
-  const inputData = { signal, samplingFrequency };
-  const inputJSON = JSON.stringify(inputData);
-  // console.log(inputJSON);
+    const signals = data.map((dataset) => {
+      return {
+        signal: dataset.signal,
+        samplingFrequency: dataset.samplingFrequency,
+      };
+    });
 
-  // Write to the standard input
-  pythonProcess.stdin.write(inputJSON);
-  pythonProcess.stdin.end();
+    const pythonScriptPath = path.join(
+      __dirname,
+      "..",
+      "scripts",
+      "find_peaks.py"
+    );
 
-  let result = "";
-  let error = "";
+    const pythonProcess = spawn("python3", [pythonScriptPath]);
 
-  // Handle process termination
-  pythonProcess.on("exit", (code) => {
-    if (code === null) {
-      console.error("Python process exited prematurely or with an error");
-      response
-        .status(500)
-        .json({ success: false, error: "Internal Server Error" });
-    } else {
-      try {
-        const parsedResult = JSON.parse(result);
-        console.log(parsedResult);
+    const inputData = { signals };
+    const inputJSON = JSON.stringify(inputData);
 
-        if (
-          parsedResult &&
-          typeof parsedResult === "object" &&
-          "peaks_count" in parsedResult
-        ) {
-          // console.log("Detected Peaks:", parsedResult.peaks_count);
-          // console.log("Threshold Used:", parsedResult.threshold_used);
+    // Write to the standard input
+    pythonProcess.stdin.write(inputJSON);
+    pythonProcess.stdin.end();
+
+    let result = "";
+    let error = "";
+
+    // Handle process termination
+    pythonProcess.on("exit", (code) => {
+      if (code === null) {
+        console.error("Python process exited prematurely or with an error");
+        response
+          .status(500)
+          .json({ success: false, error: "Internal Server Error" });
+      } else {
+        try {
+          const parsedResult = JSON.parse(result);
           console.log(parsedResult);
 
-          // response.json({ success: true, peaks: parsedResult });
-        } else {
-          console.error("Invalid JSON format in Python script output.");
+          if (
+            parsedResult &&
+            typeof parsedResult === "object" &&
+            "total_peaks" in parsedResult
+          ) {
+            response.json({
+              success: true,
+              totalPeaks: parsedResult.total_peaks,
+            });
+          } else {
+            console.error("Invalid JSON format in Python script output.");
+            response
+              .status(500)
+              .json({ success: false, error: "Internal Server Error" });
+          }
+        } catch (err) {
+          console.error("Error parsing JSON result:", err.message);
           response
             .status(500)
             .json({ success: false, error: "Internal Server Error" });
         }
-      } catch (err) {
-        console.error("Error parsing JSON result:", err.message);
-        response
-          .status(500)
-          .json({ success: false, error: "Internal Server Error" });
       }
-    }
-  });
+    });
 
-  pythonProcess.stdout.on("data", (data) => {
-    result += data;
-  });
+    pythonProcess.stdout.on("data", (data) => {
+      result += data;
+    });
 
-  pythonProcess.stderr.on("data", (data) => {
-    error += data;
-  });
+    pythonProcess.stderr.on("data", (data) => {
+      error += data;
+    });
 
-  pythonProcess.on("error", (err) => {
-    console.error(`Python process error: ${err.message}`);
+    pythonProcess.on("error", (err) => {
+      console.error(`Python process error: ${err.message}`);
+      response
+        .status(500)
+        .json({ success: false, error: "Internal Server Error" });
+    });
+  } catch (err) {
+    console.error("Error processing request:", err.message);
     response
       .status(500)
       .json({ success: false, error: "Internal Server Error" });
-  });
+  }
 });
 
 module.exports = router;
