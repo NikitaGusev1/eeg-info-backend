@@ -5,12 +5,6 @@ from scipy.signal import find_peaks
 from scipy.ndimage import grey_erosion, grey_dilation
 
 def detect_eeg_peaks(signals, duration_minutes=1):
-    # Function to trim the signal based on start minute and duration
-    def trim_signal(signal, sampling_frequency, start_minute, duration_minutes):
-        start_index = int(start_minute * 60 * sampling_frequency)
-        end_index = int((start_minute + duration_minutes) * 60 * sampling_frequency)
-        return signal[start_index:end_index]
-
     # Function for opening operation
     def opening_operation(signal, distance):
         erosion_result = grey_erosion(signal, size=distance)
@@ -50,16 +44,18 @@ def detect_eeg_peaks(signals, duration_minutes=1):
         # Calculate the number of minutes in the signal
         total_minutes = int(len(signal) / (60 * sampling_frequency))
 
+        # Apply the filter and calculate the threshold for the entire signal
+        filtered_signal, threshold = apply_filter(signal, distance=len(signal)//10, sampling_frequency=sampling_frequency)
+
         # Iterate over each minute
         for minute in range(total_minutes):
-            # Trim the signal for the current minute
-            trimmed_signal = trim_signal(signal, sampling_frequency, minute, duration_minutes)
-
-            # Apply the filter and calculate the threshold
-            filtered_signal, threshold = apply_filter(trimmed_signal, distance=len(trimmed_signal)//10, sampling_frequency=sampling_frequency)
+            # Extract the data points corresponding to the current minute
+            start_index = int(minute * 60 * sampling_frequency)
+            end_index = int((minute + duration_minutes) * 60 * sampling_frequency)
+            minute_signal = filtered_signal[start_index:end_index]
 
             # Count the peaks above the threshold with width and prominence criteria
-            detected_peaks_indices, _ = find_peaks(filtered_signal, height=threshold, width=3, prominence=237)
+            detected_peaks_indices, _ = find_peaks(minute_signal, height=threshold, width=3, prominence=237)
 
             # Append the result for the current minute
             results.append({
