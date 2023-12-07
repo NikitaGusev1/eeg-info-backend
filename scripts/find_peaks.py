@@ -4,7 +4,13 @@ import numpy as np
 from scipy.signal import find_peaks
 from scipy.ndimage import grey_erosion, grey_dilation
 
-def detect_eeg_peaks(signals, duration_minutes=1):
+def detect_eeg_peaks(signals, start_minute, duration_minutes=1):
+    # Function to trim the signal based on start minute and duration
+    def trim_signal(signal, sampling_frequency, start_minute, duration_minutes):
+        start_index = int(start_minute * 60 * sampling_frequency)
+        end_index = int((start_minute + duration_minutes) * 60 * sampling_frequency)
+        return signal[start_index:end_index]
+
     # Function for opening operation
     def opening_operation(signal, distance):
         erosion_result = grey_erosion(signal, size=distance)
@@ -32,7 +38,7 @@ def detect_eeg_peaks(signals, duration_minutes=1):
         threshold = 8 * np.median(np.abs(filtered_signal[find_peaks(filtered_signal)[0]]))
         return filtered_signal, threshold
 
-    results = []
+    total_peaks_per_minute = []
 
     for signal_data in signals:
         if "signal" not in signal_data or "samplingFrequency" not in signal_data:
@@ -41,29 +47,24 @@ def detect_eeg_peaks(signals, duration_minutes=1):
         signal = signal_data["signal"]
         sampling_frequency = signal_data["samplingFrequency"]
 
-        # Calculate the number of minutes in the signal
-        total_minutes = int(len(signal) / (60 * sampling_frequency))
+        trimmed_signal = trim_signal(signal, sampling_frequency, start_minute, duration_minutes)
 
-        # Apply the filter and calculate the threshold for the entire signal
-        filtered_signal, threshold = apply_filter(signal, distance=len(signal)//10, sampling_frequency=sampling_frequency)
+        filtered_signal, threshold = apply_filter(trimmed_signal, distance=len(trimmed_signal)//10, sampling_frequency=sampling_frequency)
 
-        # Iterate over each minute
-        for minute in range(total_minutes):
-            # Extract the data points corresponding to the current minute
-            start_index = int(minute * 60 * sampling_frequency)
-            end_index = int((minute + duration_minutes) * 60 * sampling_frequency)
-            minute_signal = filtered_signal[start_index:end_index]
+        # Count the peaks above the threshold with width and prominence criteria
+        detected_peaks_indices, _ = find_peaks(filtered_signal, height=threshold, width=40, prominence=237)
 
-            # Count the peaks above the threshold with width and prominence criteria
-            detected_peaks_indices, _ = find_peaks(minute_signal, height=threshold, width=3, prominence=237)
+        total_peaks_per_minute.append({
+            "minute": start_minute,
+            "peaks": detected_peaks_indices.tolist(),
+            "total_peaks": len(detected_peaks_indices)
+        })
 
-            # Append the result for the current minute
-            results.append({
-                "minute": minute + 1,  # Adding 1 to make minutes 1-indexed
-                "peaks_count": len(detected_peaks_indices)
-            })
+    result = {
+        "total_peaks_per_minute": total_peaks_per_minute,
+    }
 
-    return results
+    return result
 
 if __name__ == "__main__":
     try:
@@ -73,9 +74,10 @@ if __name__ == "__main__":
             raise ValueError("Missing required fields in input data")
 
         signals = input_data["signals"]
+        start_minute = input_data.get("start_minute", 1)
         duration_minutes = input_data.get("duration_minutes", 1)
 
-        result = detect_eeg_peaks(signals, duration_minutes=duration_minutes)
+        result = detect_eeg_peaks(signals, start_minute=start_minute, duration_minutes=duration_minutes)
 
         print(json.dumps(result))
     except Exception as e:

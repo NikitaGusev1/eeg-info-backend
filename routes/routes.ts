@@ -195,16 +195,12 @@ router.post("/findPeaks", authenticateToken, (request, response) => {
       } else {
         try {
           const parsedResult = JSON.parse(result);
-          console.log(parsedResult);
+          console.log(result);
 
-          if (
-            parsedResult &&
-            typeof parsedResult === "object" &&
-            "total_peaks" in parsedResult
-          ) {
+          if (parsedResult && typeof parsedResult === "object") {
             response.json({
               success: true,
-              totalPeaks: parsedResult.total_peaks,
+              data: parsedResult,
             });
           } else {
             console.error("Invalid JSON format in Python script output.");
