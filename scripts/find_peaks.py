@@ -52,13 +52,16 @@ def detect_eeg_peaks(signals, start_minute, duration_minutes=1):
         filtered_signal, threshold = apply_filter(trimmed_signal, distance=len(trimmed_signal)//10, sampling_frequency=sampling_frequency)
 
         # Count the peaks above the threshold with width and prominence criteria
-        detected_peaks_indices, _ = find_peaks(filtered_signal, height=threshold, width=40, prominence=237)
+        detected_peaks_indices, _ = find_peaks(filtered_signal, height=threshold, width=5, prominence=300)
 
         total_peaks_per_minute.append({
             "minute": start_minute,
             "peaks": detected_peaks_indices.tolist(),
             "total_peaks": len(detected_peaks_indices)
         })
+
+        # Update start_minute for the next iteration
+        start_minute += duration_minutes
 
     result = {
         "total_peaks_per_minute": total_peaks_per_minute,
