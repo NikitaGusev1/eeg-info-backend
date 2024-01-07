@@ -36,6 +36,7 @@ def detect_eeg_peaks(signals, start_minute, duration_minutes=1, morphological_di
         return filtered_signal, threshold
 
     total_peaks_per_minute = []
+    total_sum_of_peaks = 0  # New variable to accumulate total peaks
 
     for signal_data in signals:
         if "signal" not in signal_data or "samplingFrequency" not in signal_data:
@@ -47,17 +48,19 @@ def detect_eeg_peaks(signals, start_minute, duration_minutes=1, morphological_di
         trimmed_signal = trim_signal(signal, sampling_frequency, start_minute, duration_minutes)
         filtered_signal, threshold = apply_filter(trimmed_signal, morphological_distance_samples, sampling_frequency)
 
-        detected_peaks_indices, _ = find_peaks(filtered_signal, height=threshold, width=35, prominence=110)
-
+        detected_peaks_indices, _ = find_peaks(filtered_signal, height=threshold, width=35, prominence=135)
+        num_peaks = len(detected_peaks_indices)
         total_peaks_per_minute.append({
             "minute": start_minute,
-            "total_peaks": len(detected_peaks_indices)
+            "total_peaks": num_peaks
         })
+        total_sum_of_peaks += num_peaks
 
         start_minute += duration_minutes
 
     result = {
         "total_peaks_per_minute": total_peaks_per_minute,
+        "total_sum_of_peaks": total_sum_of_peaks
     }
 
     return result
