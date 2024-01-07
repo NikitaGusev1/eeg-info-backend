@@ -1,0 +1,200 @@
+// width 25 prom 90
+
+{
+  "total_peaks_per_minute": [
+      {"minute": 1, "total_peaks": 100},
+      {"minute": 2, "total_peaks": 27},
+      {"minute": 3, "total_peaks": 16},
+      {"minute": 4, "total_peaks": 16},
+      {"minute": 5, "total_peaks": 18},
+      {"minute": 6, "total_peaks": 10},
+      {"minute": 7, "total_peaks": 9},
+      {"minute": 8, "total_peaks": 23},
+      {"minute": 9, "total_peaks": 21},
+      {"minute": 10, "total_peaks": 19},
+      {"minute": 11, "total_peaks": 14},
+      {"minute": 12, "total_peaks": 16},
+      {"minute": 13, "total_peaks": 17},
+      {"minute": 14, "total_peaks": 2},
+      {"minute": 15, "total_peaks": 13},
+      {"minute": 16, "total_peaks": 10},
+      {"minute": 17, "total_peaks": 4},
+      {"minute": 18, "total_peaks": 22},
+      {"minute": 19, "total_peaks": 13},
+      {"minute": 20, "total_peaks": 0},
+      {"minute": 21, "total_peaks": 0}
+  ]
+}
+//370
+
+// width 40 prom 200
+
+{
+  "total_peaks_per_minute": [
+      {"minute": 1, "total_peaks": 0},
+      {"minute": 2, "total_peaks": 6},
+      {"minute": 3, "total_peaks": 5},
+      {"minute": 4, "total_peaks": 6},
+      {"minute": 5, "total_peaks": 2},
+      {"minute": 6, "total_peaks": 2},
+      {"minute": 7, "total_peaks": 0},
+      {"minute": 8, "total_peaks": 7},
+      {"minute": 9, "total_peaks": 2},
+      {"minute": 10, "total_peaks": 4},
+      {"minute": 11, "total_peaks": 0},
+      {"minute": 12, "total_peaks": 1},
+      {"minute": 13, "total_peaks": 5},
+      {"minute": 14, "total_peaks": 1},
+      {"minute": 15, "total_peaks": 2},
+      {"minute": 16, "total_peaks": 2},
+      {"minute": 17, "total_peaks": 3},
+      {"minute": 18, "total_peaks": 2},
+      {"minute": 19, "total_peaks": 4},
+      {"minute": 20, "total_peaks": 0},
+      {"minute": 21, "total_peaks": 0}
+  ]
+}
+//54
+
+
+// width 40 prom 160
+
+{
+  "total_peaks_per_minute": [
+      {"minute": 1, "total_peaks": 0},
+      {"minute": 2, "total_peaks": 6},
+      {"minute": 3, "total_peaks": 5},
+      {"minute": 4, "total_peaks": 6},
+      {"minute": 5, "total_peaks": 2},
+      {"minute": 6, "total_peaks": 2},
+      {"minute": 7, "total_peaks": 0},
+      {"minute": 8, "total_peaks": 7},
+      {"minute": 9, "total_peaks": 2},
+      {"minute": 10, "total_peaks": 4},
+      {"minute": 11, "total_peaks": 0},
+      {"minute": 12, "total_peaks": 1},
+      {"minute": 13, "total_peaks": 5},
+      {"minute": 14, "total_peaks": 1},
+      {"minute": 15, "total_peaks": 2},
+      {"minute": 16, "total_peaks": 2},
+      {"minute": 17, "total_peaks": 3},
+      {"minute": 18, "total_peaks": 2},
+      {"minute": 19, "total_peaks": 4},
+      {"minute": 20, "total_peaks": 0},
+      {"minute": 21, "total_peaks": 0}
+  ]
+}
+//54
+
+// width 30 prom 140
+
+{
+  "total_peaks_per_minute": [
+      {"minute": 1, "total_peaks": 69},
+      {"minute": 2, "total_peaks": 18},
+      {"minute": 3, "total_peaks": 13},
+      {"minute": 4, "total_peaks": 6},
+      {"minute": 5, "total_peaks": 10},
+      {"minute": 6, "total_peaks": 5},
+      {"minute": 7, "total_peaks": 2},
+      {"minute": 8, "total_peaks": 11},
+      {"minute": 9, "total_peaks": 10},
+      {"minute": 10, "total_peaks": 9},
+      {"minute": 11, "total_peaks": 5},
+      {"minute": 12, "total_peaks": 6},
+      {"minute": 13, "total_peaks": 7},
+      {"minute": 14, "total_peaks": 2},
+      {"minute": 15, "total_peaks": 5},
+      {"minute": 16, "total_peaks": 5},
+      {"minute": 17, "total_peaks": 4},
+      {"minute": 18, "total_peaks": 6},
+      {"minute": 19, "total_peaks": 5},
+      {"minute": 20, "total_peaks": 0},
+      {"minute": 21, "total_peaks": 0}
+  ]
+}
+
+// width 35 prom 135
+
+{
+  "total_peaks_per_minute": [
+      {"minute": 1, "total_peaks": 74},
+      {"minute": 2, "total_peaks": 16},
+      {"minute": 3, "total_peaks": 10},
+      {"minute": 4, "total_peaks": 7},
+      {"minute": 5, "total_peaks": 9},
+      {"minute": 6, "total_peaks": 5},
+      {"minute": 7, "total_peaks": 2},
+      {"minute": 8, "total_peaks": 11},
+      {"minute": 9, "total_peaks": 11},
+      {"minute": 10, "total_peaks": 9},
+      {"minute": 11, "total_peaks": 5},
+      {"minute": 12, "total_peaks": 7},
+      {"minute": 13, "total_peaks": 8},
+      {"minute": 14, "total_peaks": 2},
+      {"minute": 15, "total_peaks": 6},
+      {"minute": 16, "total_peaks": 5},
+      {"minute": 17, "total_peaks": 4},
+      {"minute": 18, "total_peaks": 7},
+      {"minute": 19, "total_peaks": 7},
+      {"minute": 20, "total_peaks": 0},
+      {"minute": 21, "total_peaks": 0}
+  ]
+}
+
+
+// width 35 prom 120
+
+{
+  "total_peaks_per_minute": [
+      {"minute": 1, "total_peaks": 80},
+      {"minute": 2, "total_peaks": 18},
+      {"minute": 3, "total_peaks": 11},
+      {"minute": 4, "total_peaks": 8},
+      {"minute": 5, "total_peaks": 11},
+      {"minute": 6, "total_peaks": 6},
+      {"minute": 7, "total_peaks": 4},
+      {"minute": 8, "total_peaks": 14},
+      {"minute": 9, "total_peaks": 12},
+      {"minute": 10, "total_peaks": 10},
+      {"minute": 11, "total_peaks": 7},
+      {"minute": 12, "total_peaks": 9},
+      {"minute": 13, "total_peaks": 10},
+      {"minute": 14, "total_peaks": 2},
+      {"minute": 15, "total_peaks": 8},
+      {"minute": 16, "total_peaks": 6},
+      {"minute": 17, "total_peaks": 4},
+      {"minute": 18, "total_peaks": 10},
+      {"minute": 19, "total_peaks": 7},
+      {"minute": 20, "total_peaks": 0},
+      {"minute": 21, "total_peaks": 0}
+  ]
+}
+
+//width 35 prom 110
+
+{
+  "total_peaks_per_minute": [
+      {"minute": 1, "total_peaks": 83},
+      {"minute": 2, "total_peaks": 20},
+      {"minute": 3, "total_peaks": 11},
+      {"minute": 4, "total_peaks": 8},
+      {"minute": 5, "total_peaks": 12},
+      {"minute": 6, "total_peaks": 7},
+      {"minute": 7, "total_peaks": 4},
+      {"minute": 8, "total_peaks": 16},
+      {"minute": 9, "total_peaks": 14},
+      {"minute": 10, "total_peaks": 13},
+      {"minute": 11, "total_peaks": 7},
+      {"minute": 12, "total_peaks": 9},
+      {"minute": 13, "total_peaks": 10},
+      {"minute": 14, "total_peaks": 2},
+      {"minute": 15, "total_peaks": 9},
+      {"minute": 16, "total_peaks": 6},
+      {"minute": 17, "total_peaks": 4},
+      {"minute": 18, "total_peaks": 10},
+      {"minute": 19, "total_peaks": 9},
+      {"minute": 20, "total_peaks": 0},
+      {"minute": 21, "total_peaks": 0}
+  ]
+}
