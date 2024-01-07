@@ -73,7 +73,7 @@ if __name__ == "__main__":
         start_minute = input_data.get("start_minute", 1)
         duration_minutes = input_data.get("duration_minutes", 1)
 
-        # Set the fixed number of samples for morphological distance
+        # Set the fixed number of samples for morphological distance. Our set of test signals has this number
         morphological_distance_samples = 1280
 
         result = detect_eeg_peaks(signals, start_minute=start_minute, duration_minutes=duration_minutes, morphological_distance_samples=morphological_distance_samples)
