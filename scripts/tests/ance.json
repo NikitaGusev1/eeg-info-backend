@@ -1,3 +1,55 @@
+// real
+{
+  "total_peaks_per_minute": [
+      {"minute": 1, "total_peaks": 9},
+      {"minute": 2, "total_peaks": 10},
+      {"minute": 3, "total_peaks": 7},
+      {"minute": 4, "total_peaks": 9},
+      {"minute": 5, "total_peaks": 8},
+      {"minute": 6, "total_peaks": 8},
+      {"minute": 7, "total_peaks": 8},
+      {"minute": 8, "total_peaks": 8},
+      {"minute": 9, "total_peaks": 10},
+      {"minute": 10, "total_peaks": 6},
+      {"minute": 11, "total_peaks": 9},
+      {"minute": 12, "total_peaks": 9},
+      {"minute": 13, "total_peaks": 6},
+      {"minute": 14, "total_peaks": 9},
+      {"minute": 15, "total_peaks": 8},
+      {"minute": 16, "total_peaks": 6},
+      {"minute": 17, "total_peaks": 10},
+      {"minute": 18, "total_peaks": 13},
+      {"minute": 19, "total_peaks": 10},
+      {"minute": 20, "total_peaks": 3},
+      {"minute": 21, "total_peaks": 0}
+  ]
+}
+{
+  "total_peaks_per_minute": [
+      {"minute": 1, "total_peaks": 100},
+      {"minute": 2, "total_peaks": 27},
+      {"minute": 3, "total_peaks": 16},
+      {"minute": 4, "total_peaks": 16},
+      {"minute": 5, "total_peaks": 18},
+      {"minute": 6, "total_peaks": 10},
+      {"minute": 7, "total_peaks": 9},
+      {"minute": 8, "total_peaks": 23},
+      {"minute": 9, "total_peaks": 21},
+      {"minute": 10, "total_peaks": 19},
+      {"minute": 11, "total_peaks": 14},
+      {"minute": 12, "total_peaks": 16},
+      {"minute": 13, "total_peaks": 17},
+      {"minute": 14, "total_peaks": 2},
+      {"minute": 15, "total_peaks": 13},
+      {"minute": 16, "total_peaks": 10},
+      {"minute": 17, "total_peaks": 4},
+      {"minute": 18, "total_peaks": 22},
+      {"minute": 19, "total_peaks": 13},
+      {"minute": 20, "total_peaks": 0},
+      {"minute": 21, "total_peaks": 0}
+  ]
+}
+
 // width 25 prom 90
 
 {
@@ -142,6 +194,8 @@
   ]
 }
 
+//205
+
 
 // width 35 prom 120
 
@@ -198,3 +252,17 @@
       {"minute": 21, "total_peaks": 0}
   ]
 }
+
+
+(45, 210) = 0.72
+(35, 180) = 0.56
+(35, 190) = 0.6
+(35, 170) = 0.57
+(35, 175) = 0.54
+(35, 150) = 0.71
+(35, 155) = 0.69
+(40, 155) = 0.64
+(30, 155) = 0.69
+()
+
+average = 0.64

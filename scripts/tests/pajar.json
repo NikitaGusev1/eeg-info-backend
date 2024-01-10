@@ -1,4 +1,30 @@
 //pajar.edf
+// real
+{
+  "total_peaks_per_minute": [
+    {"minute": 1, "total_peaks": 10},
+    {"minute": 2, "total_peaks": 13},
+    {"minute": 3, "total_peaks": 15},
+    {"minute": 4, "total_peaks": 29},
+    {"minute": 5, "total_peaks": 11},
+    {"minute": 6, "total_peaks": 14},
+    {"minute": 7, "total_peaks": 11},
+    {"minute": 8, "total_peaks": 18},
+    {"minute": 9, "total_peaks": 8},
+    {"minute": 10, "total_peaks": 22},
+    {"minute": 11, "total_peaks": 22},
+    {"minute": 12, "total_peaks": 24},
+    {"minute": 13, "total_peaks": 14},
+    {"minute": 14, "total_peaks": 27},
+    {"minute": 15, "total_peaks": 30},
+    {"minute": 16, "total_peaks": 13},
+    {"minute": 17, "total_peaks": 29},
+    {"minute": 18, "total_peaks": 16},
+    {"minute": 19, "total_peaks": 24},
+    {"minute": 20, "total_peaks": 20},
+    {"minute": 21, "total_peaks": 0}
+  ]
+}
 // width 10 prom 99
 {
     "total_peaks_per_minute": [
@@ -334,4 +360,13 @@
       {"minute": 21, "total_peaks": 0}
     ]
   }
+  
+  (20, 100) = 0.98
+  (50,55) = 0.95
+  (75,55) = 0.97
+  (40,30) = 0.97
+  (5,30) = 1.1
+
+
+
   

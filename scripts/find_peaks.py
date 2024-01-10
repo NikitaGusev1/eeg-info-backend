@@ -48,7 +48,7 @@ def detect_eeg_peaks(signals, start_minute, duration_minutes=1, morphological_di
         trimmed_signal = trim_signal(signal, sampling_frequency, start_minute, duration_minutes)
         filtered_signal, threshold = apply_filter(trimmed_signal, morphological_distance_samples, sampling_frequency)
 
-        detected_peaks_indices, _ = find_peaks(filtered_signal, height=threshold, width=35, prominence=135)
+        detected_peaks_indices, _ = find_peaks(filtered_signal, height=threshold, width=25, prominence=100)
         num_peaks = len(detected_peaks_indices)
         total_peaks_per_minute.append({
             "minute": start_minute,
