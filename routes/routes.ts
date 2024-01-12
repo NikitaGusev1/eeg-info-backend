@@ -61,6 +61,7 @@ router.get("/user", authenticateToken, async (request, response) => {
       firstName: user.name || user.firstName,
       lastName: user.lastName ?? "",
       isAdmin: user.isAdmin,
+      assignedFiles: user.assignedFiles,
     };
 
     response.send(userResponse);
@@ -114,7 +115,6 @@ router.post("/renewToken", (request, response) => {
 router.post("/assignFiles", authenticateToken, async (request, response) => {
   try {
     const { email, file, fileName, mimeType } = request.body;
-
     // Create and save the file document
     const newFile = new FileModel({
       fileName,
@@ -126,7 +126,7 @@ router.post("/assignFiles", authenticateToken, async (request, response) => {
 
     await UserModel.updateOne(
       { email: email },
-      { $push: { assignedFiles: savedFile._id } }
+      { $push: { assignedFiles: savedFile.fileName } }
     );
 
     response
@@ -135,6 +135,30 @@ router.post("/assignFiles", authenticateToken, async (request, response) => {
   } catch (error) {
     console.error("Error in /assignFiles endpoint:", error);
     response.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+router.get("/download/:filename", async (req, res) => {
+  try {
+    const fileName = req.params.fileName;
+    const file = await FileModel.findOne({ fileName });
+
+    if (!file) {
+      return res.status(404).send("File not found");
+    }
+
+    const fileBuffer = Buffer.from(file.data, "base64");
+
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="' + file.fileName + '"'
+    );
+    res.setHeader("Content-Type", file.mimeType);
+
+    res.send(fileBuffer);
+  } catch (error) {
+    console.error("Error in file download route:", error);
+    res.status(500).send("Internal Server Error");
   }
 });
 
