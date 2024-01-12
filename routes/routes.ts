@@ -138,7 +138,7 @@ router.post("/assignFiles", authenticateToken, async (request, response) => {
   }
 });
 
-router.get("/download/:filename", async (req, res) => {
+router.get("/download/:fileName", async (req, res) => {
   try {
     const fileName = req.params.fileName;
     const file = await FileModel.findOne({ fileName });
