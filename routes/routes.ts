@@ -1,5 +1,6 @@
 const express = require("express");
 const UserModel = require("../models/User.ts");
+const FileModel = require("../models/File.ts");
 const app = express();
 const router = express.Router();
 const bcrypt = require("bcrypt");
@@ -112,40 +113,28 @@ router.post("/renewToken", (request, response) => {
 
 router.post("/assignFiles", authenticateToken, async (request, response) => {
   try {
-    const { isAdmin } = request.user;
-    if (isAdmin) {
-      const { files, email } = request.body;
-      const assignee = await UserModel.findOne({ email });
+    const { email, file, fileName, mimeType } = request.body;
 
-      if (!assignee) {
-        return response.status(404).json({ message: "User not found" });
-      }
+    // Create and save the file document
+    const newFile = new FileModel({
+      fileName,
+      mimeType,
+      data: file, // This is the base64 encoded data
+    });
 
-      const uniqueFiles = files.filter(
-        (file) => !assignee.assignedFiles.includes(file)
-      );
+    const savedFile = await newFile.save();
 
-      if (uniqueFiles.length === 0) {
-        return response
-          .status(400)
-          .json({ message: "All files are already assigned" });
-      }
+    await UserModel.updateOne(
+      { email: email },
+      { $push: { assignedFiles: savedFile._id } }
+    );
 
-      const updatedAssignedFiles = [...assignee.assignedFiles, ...uniqueFiles];
-
-      await UserModel.findOneAndUpdate(
-        { email },
-        { assignedFiles: updatedAssignedFiles },
-        { new: true }
-      );
-
-      response.status(200).json({ message: "Files assigned successfully" });
-    } else {
-      response.status(403).json({ message: "Permission denied" });
-    }
+    response
+      .status(200)
+      .json({ message: "File assigned successfully", fileId: savedFile._id });
   } catch (error) {
-    console.error(error);
-    response.status(500).json({ message: "Server error" });
+    console.error("Error in /assignFiles endpoint:", error);
+    response.status(500).json({ message: "Internal Server Error" });
   }
 });
 
