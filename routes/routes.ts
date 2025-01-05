@@ -98,20 +98,6 @@ router.post("/login", async (request, response) => {
   }
 });
 
-router.post("/renewToken", (request, response) => {
-  try {
-    const userData = {
-      email: request.user.email,
-    };
-
-    const newToken = jwt.sign(userData, jwtSecretKey, { expiresIn: "1h" });
-
-    response.json({ token: newToken });
-  } catch (error) {
-    response.status(403).json({ message: "Invalid token" });
-  }
-});
-
 router.post("/assignFiles", authenticateToken, async (request, response) => {
   try {
     const { email, file, fileName, mimeType } = request.body;
